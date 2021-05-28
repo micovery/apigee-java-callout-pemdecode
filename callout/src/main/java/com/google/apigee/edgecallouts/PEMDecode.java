@@ -112,13 +112,13 @@ public class PEMDecode implements Execution {
     parts.put("nonCriticalExtensionOIDKeys", getOIDKeyList(cert.getNonCriticalExtensionOIDs()));
 
     Set<String> coids = cert.getCriticalExtensionOIDs();
-    for (String oid : coids) {
+    for (String oid : safe(coids)) {
       String value = getCertExtensionAsString(cert, oid);
       parts.put(oidToKey(oid), value);
     }
 
     Set<String> ncoids = cert.getNonCriticalExtensionOIDs();
-    for (String oid : ncoids) {
+    for (String oid : safe(ncoids)) {
       String value = getCertExtensionAsString(cert, oid);
       parts.put(oidToKey(oid), value);
     }
@@ -137,7 +137,7 @@ public class PEMDecode implements Execution {
 
   public static String getOIDKeyList(Set<String> oids) {
     List<String> keys = new LinkedList<>();
-    for (String oid: oids) {
+    for (String oid: safe(oids)) {
       keys.add("\"" + oidToKey(oid) + "\"");
     }
     return "[" + String.join(",", keys) + "]";
@@ -209,5 +209,9 @@ public class PEMDecode implements Execution {
       return ((ASN1ObjectIdentifier) asn1).getId();
     }
     return ASN1Dump.dumpAsString(asn1);
+  }
+
+  private static Collection<String> safe( Collection<String> other ) {
+    return other == null ? Collections.EMPTY_LIST : other;
   }
 }
